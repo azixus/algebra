@@ -3,6 +3,7 @@ mod expander;
 use crate::{Field, PrimeField};
 
 use ark_std::vec::Vec;
+use digest::core_api::BlockSizeUser;
 use digest::DynDigest;
 use expander::Expander;
 
@@ -42,8 +43,8 @@ pub struct DefaultFieldHasher<H: Default + DynDigest + Clone, const SEC_PARAM: u
     len_per_base_elem: usize,
 }
 
-impl<F: Field, H: Default + DynDigest + Clone, const SEC_PARAM: usize> HashToField<F>
-    for DefaultFieldHasher<H, SEC_PARAM>
+impl<F: Field, H: Default + BlockSizeUser + DynDigest + Clone, const SEC_PARAM: usize>
+    HashToField<F> for DefaultFieldHasher<H, SEC_PARAM>
 {
     fn new(dst: &[u8]) -> Self {
         // The final output of `hash_to_field` will be an array of field
@@ -53,7 +54,7 @@ impl<F: Field, H: Default + DynDigest + Clone, const SEC_PARAM: usize> HashToFie
         let expander = ExpanderXmd {
             hasher: H::default(),
             dst: dst.to_vec(),
-            block_size: len_per_base_elem,
+            block_size: H::block_size(),
         };
 
         DefaultFieldHasher {
