@@ -4,7 +4,7 @@ use core::marker::PhantomData;
 
 use crate::{Field, PrimeField};
 
-use digest::{FixedOutputReset, XofReader};
+use digest::{core_api::BlockSizeUser, FixedOutputReset, XofReader};
 use expander::Expander;
 
 use self::expander::ExpanderXmd;
@@ -43,8 +43,8 @@ pub struct DefaultFieldHasher<H: FixedOutputReset + Default + Clone, const SEC_P
     len_per_base_elem: usize,
 }
 
-impl<F: Field, H: FixedOutputReset + Default + Clone, const SEC_PARAM: usize> HashToField<F>
-    for DefaultFieldHasher<H, SEC_PARAM>
+impl<F: Field, H: FixedOutputReset + BlockSizeUser + Default + Clone, const SEC_PARAM: usize>
+    HashToField<F> for DefaultFieldHasher<H, SEC_PARAM>
 {
     fn new(dst: &[u8]) -> Self {
         // The final output of `hash_to_field` will be an array of field
@@ -54,7 +54,7 @@ impl<F: Field, H: FixedOutputReset + Default + Clone, const SEC_PARAM: usize> Ha
         let expander = ExpanderXmd {
             hasher: PhantomData,
             dst: dst.to_vec(),
-            block_size: len_per_base_elem,
+            block_size: H::block_size(),
         };
 
         DefaultFieldHasher {
