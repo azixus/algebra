@@ -63,7 +63,7 @@ features = ["use_core"]
 
 [dependencies.digest]
 version = "0.10"
-features = ["alloc"]
+features = ["alloc", "core-api"]
 default-features = false
 
 [dependencies.itertools]
